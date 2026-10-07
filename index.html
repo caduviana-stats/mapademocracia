@@ -11,7 +11,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Mapa comparativo de democracia e autonomia ministerial em 57 países.">
-  <title>Atlas V4 | Democracia e autonomia ministerial</title>
+  <title>Atlas V5 | Democracia e autonomia ministerial</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -50,11 +50,21 @@
     .country-popup .popup-pending{color:#76869b;font-size:13px;border:1px dashed #c8d4e3;border-radius:7px;padding:7px 10px;background:#f9fbfe}
     .leaflet-container .country-popup a.leaflet-popup-close-button{color:#fff;top:10px;right:10px;border-radius:50%;background:rgba(255,255,255,.12);width:26px;height:26px;line-height:26px}
     .country-popup .leaflet-popup-tip{background:#f7f9fc}
+    .country-card[hidden]{display:none!important}
+    .country-card{position:absolute;z-index:1100;width:300px;max-width:calc(100% - 24px);max-height:calc(100% - 24px);overflow:auto;background:#fff;border:1px solid #dce4ef;border-radius:16px;box-shadow:0 14px 40px rgba(16,45,84,.22);pointer-events:auto}
+    .country-card h2{margin:0;padding:18px 40px 16px 20px;background:#102d54;color:#fff;font-size:20px;letter-spacing:-.3px}
+    .country-card .popup-row{margin:0;padding:12px 20px;border-bottom:1px solid #edf1f6;overflow-wrap:anywhere}
+    .country-card .popup-row:last-child{border:0;background:#f7f9fc}
+    .country-card .popup-row small{font-size:11px;color:#687b92}
+    .country-card .popup-row strong{font-size:30px;color:#102d54}
+    .country-card .popup-pending{font-size:13px;border:1px dashed #c8d4e3;border-radius:7px;padding:7px 10px;background:#f9fbfe}
+    #close-card{position:absolute;top:10px;right:10px;width:27px;height:27px;padding:0;border:0;border-radius:50%;color:#fff;background:#ffffff24;font-size:23px;line-height:27px}
+    #close-card:hover{background:#ffffff40}
   </style>
 </head>
 <body>
   <!-- ## 3. Estrutura da interface -->
-  <header><div><div class="eyebrow">Atlas comparativo • Instituições e democracia • V4</div><h1>Democracia e autonomia ministerial</h1><p>Explore os países da amostra e consulte seus indicadores.</p></div><span class="count" id="count">Carregando países…</span></header>
+  <header><div><div class="eyebrow">Atlas comparativo • Instituições e democracia • V5</div><h1>Democracia e autonomia ministerial</h1><p>Explore os países da amostra e consulte seus indicadores.</p></div><span class="count" id="count">Carregando países…</span></header>
   <main>
     <aside aria-label="Pesquisa e detalhes do país">
       <label for="search">Encontre um país</label><input id="search" type="search" placeholder="Digite o nome do país" autocomplete="off">
@@ -63,7 +73,7 @@
       <div id="details" aria-live="polite"><div class="eyebrow">Como explorar</div><h2>57 países, um olhar comparativo</h2><p>Passe o cursor sobre um país para destacá-lo. Clique no território ou no ponto da capital para consultar seus dados.</p><p>Use a pesquisa para localizar países pequenos ou pontos próximos.</p></div>
       <div class="divider"></div><p id="status" role="status">Carregando a base de dados…</p><p style="font-size:12px">Fonte do índice: planilha fornecida. IAM e designações ainda não preenchidos aparecem como campos pendentes.</p><a href="dados/paises.csv" download>Baixar dados em CSV</a>
     </aside>
-    <section class="map-wrap" aria-label="Mapa mundial interativo"><div id="map"></div><div class="legend"><strong>Índice de Democracia</strong><div><span class="swatch" style="background:#749ac7"></span>6,00 a menos de 7,00</div><div><span class="swatch" style="background:#3c6ca7"></span>7,00 a menos de 8,00</div><div><span class="swatch" style="background:#214d85"></span>8,00 a menos de 9,00</div><div><span class="swatch" style="background:#102d54"></span>9,00 a 10,00</div><div><span class="swatch" style="background:#eee"></span>Fora da amostra</div></div></section>
+    <section class="map-wrap" aria-label="Mapa mundial interativo"><div id="map"></div><section id="country-card" class="country-card" hidden aria-label="Informações do país"><button id="close-card" type="button" aria-label="Fechar informações">×</button><div id="card-content"></div></section><div class="legend"><strong>Índice de Democracia</strong><div><span class="swatch" style="background:#749ac7"></span>6,00 a menos de 7,00</div><div><span class="swatch" style="background:#3c6ca7"></span>7,00 a menos de 8,00</div><div><span class="swatch" style="background:#214d85"></span>8,00 a menos de 9,00</div><div><span class="swatch" style="background:#102d54"></span>9,00 a 10,00</div><div><span class="swatch" style="background:#eee"></span>Fora da amostra</div></div></section>
   </main>
   <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -98,10 +108,21 @@
     // ## 6. Conteúdo compartilhado entre pop-up e painel
     function popup(record){return `<h2>${escape(record.pais)}</h2><div class="popup-row"><small>Índice de Democracia</small><strong>${format(record.indice_democracia)}</strong></div><div class="popup-row"><small>Índice de Autonomia Ministerial (IAM)</small><div class="${record.iam===null?'popup-pending':''}">${format(record.iam)}</div></div><div class="popup-row"><small>Designação do Ministério Público</small>${escape(record.designacao_mp||'A preencher')}</div><div class="popup-row"><small>Capital de referência</small>${escape(record.capital)}</div>`;}
     // Caixa única: clique no território, na capital ou seleção pela pesquisa.
-    function openCountryPopup(record,latlng){
-      L.popup({className:'country-popup',maxWidth:340,minWidth:240,maxHeight:330,autoPan:true,autoPanPadding:[24,24],keepInView:true})
-        .setLatLng(latlng).setContent(popup(record)).openOn(map);
+    const card=document.getElementById('country-card');
+    let cardAnchor=null;
+    function positionCountryCard(){
+      if(card.hidden||!cardAnchor)return;
+      const point=map.latLngToContainerPoint(cardAnchor),size=map.getSize();
+      const left=Math.max(12,Math.min(point.x+16,size.x-card.offsetWidth-12));
+      const top=Math.max(12,Math.min(point.y-card.offsetHeight/2,size.y-card.offsetHeight-12));
+      card.style.left=`${left}px`;card.style.top=`${top}px`;
     }
+    function openCountryPopup(record,latlng){
+      cardAnchor=L.latLng(latlng);
+      document.getElementById('card-content').innerHTML=popup(record);
+      card.hidden=false;positionCountryCard();
+    }
+    document.getElementById('close-card').addEventListener('click',()=>{card.hidden=true;cardAnchor=null;});
     function showDetails(record){ui.details.innerHTML=`<div class="eyebrow">País selecionado</div><h2>${escape(record.pais)}</h2><dl><dt>Índice de Democracia</dt><dd class="score">${format(record.indice_democracia)}</dd><dt>Índice de Autonomia Ministerial (IAM)</dt><dd class="${record.iam===null?'pending':''}">${format(record.iam)}</dd><dt>Designação do Ministério Público</dt><dd class="${record.designacao_mp?'':'pending'}">${escape(record.designacao_mp||'A preencher')}</dd><dt>Capital de referência</dt><dd>${escape(record.capital)}</dd></dl>`;}
     // ## 7. Base cartográfica, polígonos e pontos das capitais
     function polygonStyle(record){const active=record && record.iso3===state.selected;return {fillColor:record?color(record.indice_democracia):'#eee',fillOpacity:record ? 1 : .65,color:active?'#70a7e4':'#fff',weight:active?3:1};}
@@ -136,10 +157,10 @@
         map.attributionControl.addAttribution('Limites: <a href="https://www.naturalearthdata.com/">Natural Earth</a>');
         const [csv,world]=await Promise.all([load(CONFIG.data,'text'),load(CONFIG.boundaries)]);state.records=parseData(csv);
         const ids=new Set(world.features.map(f=>f.properties.iso3));const missing=state.records.filter(r=>!ids.has(r.iso3));if(missing.length)throw new Error(`Países sem polígono: ${missing.map(r=>r.pais).join(', ')}.`);
-        draw(world);options();ui.count.textContent=`${state.records.length} países na amostra`;ui.status.textContent='V4 • Base vetorial local carregada. Pontos nas capitais.';
+        draw(world);map.on('move zoom resize',positionCountryCard);options();ui.count.textContent=`${state.records.length} países na amostra`;ui.status.textContent='V5 • Base vetorial local carregada. Pontos nas capitais.';
         ui.search.addEventListener('input',options);ui.search.addEventListener('keydown',e=>{if(e.key==='Enter'){const found=options();if(found.length===1)selectCountry(found[0]);}});
         ui.countries.addEventListener('change',()=>{const r=state.records.find(r=>r.iso3===ui.countries.value);if(r)selectCountry(r);});
-        ui.reset.addEventListener('click',()=>{map.closePopup();map.setView(CONFIG.center,CONFIG.zoom);ui.search.value='';options();});
+        ui.reset.addEventListener('click',()=>{card.hidden=true;cardAnchor=null;map.closePopup();map.setView(CONFIG.center,CONFIG.zoom);ui.search.value='';options();});
       }catch(error){console.error(error);ui.status.textContent=`Erro: ${error.message} Abra o projeto por um servidor HTTP ou GitHub Pages.`;ui.count.textContent='Falha no carregamento';}
     }
     init();
