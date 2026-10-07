@@ -11,53 +11,59 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Mapa comparativo de democracia e autonomia ministerial em 57 países.">
-  <title>Atlas | Democracia e autonomia ministerial</title>
+  <title>Atlas V4 | Democracia e autonomia ministerial</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
   <!-- ## 2. Identidade visual e layout responsivo -->
   <style>
-    :root{--ink:#142947;--muted:#64748b;--line:#dce4ef;--accent:#173e70;--paper:#f3f6fb}
+    :root{--ink:#18323b;--muted:#61757c;--line:#dce5e7;--accent:#087f8c;--paper:#f5f8f8}
     *{box-sizing:border-box}body{margin:0;color:var(--ink);font:15px/1.5 system-ui,sans-serif;background:var(--paper)}
     header{padding:22px 30px;background:#fff;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:20px;align-items:center}
     .eyebrow{font-size:11px;letter-spacing:2px;font-weight:700;color:var(--accent);text-transform:uppercase}h1{margin:4px 0;font-size:25px;letter-spacing:-.6px}p{margin:8px 0;color:var(--muted)}
-    .count{white-space:nowrap;background:#e9eff9;border-radius:24px;padding:8px 15px;font-weight:600}
+    .count{white-space:nowrap;background:#e5f3f3;border-radius:24px;padding:8px 15px;font-weight:600}
     main{display:grid;grid-template-columns:310px 1fr;height:calc(100dvh - 128px);min-height:560px}aside{background:#fff;padding:22px;overflow:auto;border-right:1px solid var(--line)}
     label{display:block;font-weight:600;font-size:13px;margin:0 0 8px}input,select,button{font:inherit}input,select{width:100%;border:1px solid #b8cccf;border-radius:7px;padding:10px;background:#fff;color:var(--ink)}select{margin-top:9px}button{cursor:pointer;border:1px solid #b8cccf;border-radius:7px;padding:9px 13px;background:#fff;color:var(--ink)}button:hover{background:#eef7f7}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #f5b942;outline-offset:2px}
     #reset{width:100%;margin:12px 0 24px}h2{font-size:19px;margin:10px 0}.divider{border-top:1px solid var(--line);margin:20px 0}dl{margin:0}dt{color:var(--muted);font-size:12px;margin-top:17px}dd{margin:4px 0;font-weight:600}.score{font-size:38px;letter-spacing:-1px;color:var(--accent)}.pending{border:1px dashed #adbec2;padding:12px;border-radius:6px;font-weight:400;color:var(--muted)}
-    #map{height:100%;background:#eef3fa}.map-wrap{position:relative;min-width:0}.legend{position:absolute;bottom:28px;left:15px;z-index:500;background:#fffffff2;padding:12px 15px;border-radius:8px;box-shadow:0 2px 12px #14294715;font-size:12px;max-width:240px}.legend strong{display:block;margin-bottom:5px}.swatch{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:7px}.legend div{margin:4px 0}.leaflet-tooltip.country-name{border:0;box-shadow:none;background:#fffffff0;font-weight:600;font-size:11px;color:var(--ink)}.leaflet-popup-content{min-width:210px}.leaflet-popup-content h2{margin:0 0 10px}.popup-row{margin:8px 0}.popup-row small{display:block;color:var(--muted)}.popup-pending{border-bottom:1px dashed #b8cccf;padding-bottom:4px;color:var(--muted)}#status{font-size:12px}a{color:var(--accent)}
+    #map{height:100%;background:#f0f1f3}.map-wrap{position:relative;min-width:0}.legend{position:absolute;bottom:28px;left:15px;z-index:500;background:#fffffff2;padding:12px 15px;border-radius:8px;box-shadow:0 2px 12px #18323b15;font-size:12px;max-width:240px}.legend strong{display:block;margin-bottom:5px}.swatch{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:7px}.legend div{margin:4px 0}.leaflet-tooltip.country-name{border:0;box-shadow:none;background:#fffffff0;font-weight:600;font-size:11px;color:var(--ink)}.leaflet-popup-content{min-width:210px}.leaflet-popup-content h2{margin:0 0 10px}.popup-row{margin:8px 0}.popup-row small{display:block;color:var(--muted)}.popup-pending{border-bottom:1px dashed #b8cccf;padding-bottom:4px;color:var(--muted)}#status{font-size:12px}a{color:var(--accent)}
     @media(max-width:760px){header{padding:16px;display:block}h1{font-size:21px}.count{display:inline-block;font-size:12px;margin-top:8px}main{height:auto;display:flex;flex-direction:column;min-height:0}.map-wrap{order:-1;height:60dvh;min-height:360px}aside{border-right:0;padding:18px}header p{font-size:12px}.legend{font-size:10px;bottom:22px;padding:8px}}
 
-    /* ## 2.1. Acabamento azul-marinho e detalhes integrados */
-    header{background:#102440;color:#fff;border:0;box-shadow:0 4px 18px #10244018}
-    header .eyebrow{color:#97b8e7}header p{color:#bbcae0}.count{background:#ffffff12;color:#dbe8fa;border:1px solid #ffffff23}
-    aside{padding:26px;background:#fff}input,select{border-color:#dce4ef;background:#f8fafd;border-radius:10px}
-    button{border-color:#dce4ef;border-radius:10px}button:hover{background:#edf3fb}
-    #reset{background:#173e70;color:#fff;border:0;box-shadow:0 3px 8px #173e7020}
-    #details{border-radius:14px;background:linear-gradient(145deg,#f1f5fb,#fafcff);padding:20px;border:1px solid #e2e9f3}
-    #details h2{font-size:25px;margin:7px 0 17px;letter-spacing:-.6px}
-    .score{font-size:46px;line-height:1.2;color:#102f59}.pending{border:0;border-bottom:1px solid #c8d5e7;background:#fff;border-radius:7px;padding:10px 12px;font-size:13px}
-    .legend{border:1px solid #dce4ef;border-radius:12px;box-shadow:0 6px 25px #14294710;color:#334866}
-    .leaflet-tooltip.country-name{background:#102440;color:#fff;border:0;border-radius:8px;box-shadow:0 4px 14px #10244022;padding:7px 10px}
-    .leaflet-tooltip-top:before{border-top-color:#102440}.leaflet-tooltip-left:before{border-left-color:#102440}.leaflet-tooltip-right:before{border-right-color:#102440}
-    .leaflet-interactive:focus{outline:none}.leaflet-interactive:focus-visible{outline:2px solid #68a9ee}
-    .leaflet-bar{border:1px solid #d5dfed!important;box-shadow:0 3px 12px #14294712!important;border-radius:9px!important;overflow:hidden}
-    .leaflet-bar a{color:#173e70!important}.leaflet-control-attribution{background:#ffffffbb!important;font-size:10px}
-    @media(max-width:760px){aside{padding:16px}#details{padding:17px}.map-wrap{height:58dvh}}
+    /* ## 2.1. Interação e acabamento da caixa flutuante */
+    /* Evita o retângulo de foco no SVG após um clique com o mouse. */
+    .leaflet-interactive:focus{outline:none}
+    .leaflet-interactive:focus-visible{outline:none;filter:drop-shadow(0 0 2px #345c8a)}
+    .leaflet-popup-content-wrapper{border-radius:14px;box-shadow:0 8px 30px rgba(28,40,58,.18);border:1px solid #e1e6ec}
+    .leaflet-popup-content{margin:20px 23px;line-height:1.5}
+    .leaflet-popup-content h2{font-size:21px;color:#102d54;border-bottom:1px solid #e5e9ef;padding-bottom:10px}
+    .popup-row{margin:12px 0}.popup-row small{font-size:11px;letter-spacing:.2px;margin-bottom:3px}
+    .popup-row strong{font-size:25px;color:#102d54}.popup-pending{border-bottom:1px dashed #c3cfde;padding:4px 0 7px}
+    .leaflet-container a.leaflet-popup-close-button{color:#738398;top:6px;right:6px}
+    .country-popup .leaflet-popup-content-wrapper{padding:0;overflow:hidden;border:1px solid #dce4ef;border-radius:16px;box-shadow:0 14px 40px rgba(16,45,84,.2)}
+    .country-popup .leaflet-popup-content{margin:0;width:280px;max-width:calc(100vw - 80px)}
+    .country-popup h2{margin:0;padding:18px 38px 16px 20px;background:#102d54;color:#fff;border:0;font-size:20px;letter-spacing:-.3px}
+    .country-popup .popup-row{margin:0;padding:12px 20px;border-bottom:1px solid #edf1f6;overflow-wrap:anywhere}
+    .country-popup .popup-row:last-child{border:0;background:#f7f9fc;border-radius:0 0 16px 16px}
+    .country-popup .popup-row small{color:#687b92;font-size:11px}
+    .country-popup .popup-row strong{font-size:30px;color:#102d54}
+    .country-popup .popup-pending{color:#76869b;font-size:13px;border:1px dashed #c8d4e3;border-radius:7px;padding:7px 10px;background:#f9fbfe}
+    .leaflet-container .country-popup a.leaflet-popup-close-button{color:#fff;top:10px;right:10px;border-radius:50%;background:rgba(255,255,255,.12);width:26px;height:26px;line-height:26px}
+    .country-popup .leaflet-popup-tip{background:#f7f9fc}
   </style>
 </head>
 <body>
   <!-- ## 3. Estrutura da interface -->
-  <header><div><div class="eyebrow">Atlas comparativo • Instituições e democracia</div><h1>Democracia e autonomia ministerial</h1><p>Explore os países da amostra e consulte seus indicadores.</p></div><span class="count" id="count">Carregando países…</span></header>
+  <header><div><div class="eyebrow">Atlas comparativo • Instituições e democracia • V4</div><h1>Democracia e autonomia ministerial</h1><p>Explore os países da amostra e consulte seus indicadores.</p></div><span class="count" id="count">Carregando países…</span></header>
   <main>
     <aside aria-label="Pesquisa e detalhes do país">
       <label for="search">Encontre um país</label><input id="search" type="search" placeholder="Digite o nome do país" autocomplete="off">
       <select id="countries" aria-label="Selecione um país"><option value="">Selecione um país…</option></select>
       <button id="reset" type="button">Visão mundial</button>
-      <div id="details" aria-live="polite"><div class="eyebrow">Como explorar</div><h2>57 países, um olhar comparativo</h2><p>Passe o cursor sobre um país para destacá-lo. Clique no território ou no ponto da capital para consultar seus dados no painel.</p><p>Use a pesquisa para localizar países pequenos ou pontos próximos.</p></div>
+      <div id="details" aria-live="polite"><div class="eyebrow">Como explorar</div><h2>57 países, um olhar comparativo</h2><p>Passe o cursor sobre um país para destacá-lo. Clique no território ou no ponto da capital para consultar seus dados.</p><p>Use a pesquisa para localizar países pequenos ou pontos próximos.</p></div>
       <div class="divider"></div><p id="status" role="status">Carregando a base de dados…</p><p style="font-size:12px">Fonte do índice: planilha fornecida. IAM e designações ainda não preenchidos aparecem como campos pendentes.</p><a href="dados/paises.csv" download>Baixar dados em CSV</a>
     </aside>
-    <section class="map-wrap" aria-label="Mapa mundial interativo"><div id="map"></div><div class="legend"><strong>Índice de Democracia</strong><div><span class="swatch" style="background:#96b8e0"></span>6,00 a menos de 7,00</div><div><span class="swatch" style="background:#5485bd"></span>7,00 a menos de 8,00</div><div><span class="swatch" style="background:#285b94"></span>8,00 a menos de 9,00</div><div><span class="swatch" style="background:#102f59"></span>9,00 a 10,00</div><div><span class="swatch" style="background:#dce4ef"></span>Fora da amostra</div></div></section>
+    <section class="map-wrap" aria-label="Mapa mundial interativo"><div id="map"></div><div class="legend"><strong>Índice de Democracia</strong><div><span class="swatch" style="background:#749ac7"></span>6,00 a menos de 7,00</div><div><span class="swatch" style="background:#3c6ca7"></span>7,00 a menos de 8,00</div><div><span class="swatch" style="background:#214d85"></span>8,00 a menos de 9,00</div><div><span class="swatch" style="background:#102d54"></span>9,00 a 10,00</div><div><span class="swatch" style="background:#eee"></span>Fora da amostra</div></div></section>
   </main>
   <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -71,10 +77,10 @@
     const normalize = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
     const number = value => Number(String(value).replace(',','.'));
     const format = value => value==null ? 'A preencher' : value.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-    const color = value => value>=9?'#102f59':value>=8?'#285b94':value>=7?'#5485bd':'#96b8e0';
+    const color = value => value>=9?'#102d54':value>=8?'#214d85':value>=7?'#3c6ca7':'#749ac7';
     // ## 5. Carregamento e validação: campos vazios nunca viram zero
     async function load(url,kind='json') {
-      const response = await fetch(url); if(!response.ok) throw new Error(`Não foi possível carregar ${url} (${response.status}).`);
+      const response = await fetch(url, {cache:'no-store'}); if(!response.ok) throw new Error(`Não foi possível carregar ${url} (${response.status}).`);
       return kind==='json'?response.json():response.text();
     }
     function parseData(csv) {
@@ -89,30 +95,36 @@
         return record;
       });
     }
-    // ## 6. Painel de detalhes: seleção sem caixas flutuantes
+    // ## 6. Conteúdo compartilhado entre pop-up e painel
+    function popup(record){return `<h2>${escape(record.pais)}</h2><div class="popup-row"><small>Índice de Democracia</small><strong>${format(record.indice_democracia)}</strong></div><div class="popup-row"><small>Índice de Autonomia Ministerial (IAM)</small><div class="${record.iam===null?'popup-pending':''}">${format(record.iam)}</div></div><div class="popup-row"><small>Designação do Ministério Público</small>${escape(record.designacao_mp||'A preencher')}</div><div class="popup-row"><small>Capital de referência</small>${escape(record.capital)}</div>`;}
+    // Caixa única: clique no território, na capital ou seleção pela pesquisa.
+    function openCountryPopup(record,latlng){
+      L.popup({className:'country-popup',maxWidth:340,minWidth:240,maxHeight:330,autoPan:true,autoPanPadding:[24,24],keepInView:true})
+        .setLatLng(latlng).setContent(popup(record)).openOn(map);
+    }
     function showDetails(record){ui.details.innerHTML=`<div class="eyebrow">País selecionado</div><h2>${escape(record.pais)}</h2><dl><dt>Índice de Democracia</dt><dd class="score">${format(record.indice_democracia)}</dd><dt>Índice de Autonomia Ministerial (IAM)</dt><dd class="${record.iam===null?'pending':''}">${format(record.iam)}</dd><dt>Designação do Ministério Público</dt><dd class="${record.designacao_mp?'':'pending'}">${escape(record.designacao_mp||'A preencher')}</dd><dt>Capital de referência</dt><dd>${escape(record.capital)}</dd></dl>`;}
     // ## 7. Base cartográfica, polígonos e pontos das capitais
-    function polygonStyle(record){const active=record && record.iso3===state.selected;return {fillColor:record?color(record.indice_democracia):'#dce4ef',fillOpacity:record ? .92 : .8,color:active?'#68a9ee':'#f7faff',weight:active?3:1};}
+    function polygonStyle(record){const active=record && record.iso3===state.selected;return {fillColor:record?color(record.indice_democracia):'#eee',fillOpacity:record ? 1 : .65,color:active?'#70a7e4':'#fff',weight:active?3:1};}
     function draw(world){
       const byId=new Map(state.records.map(r=>[r.iso3,r]));
       L.geoJSON(world,{style:f=>polygonStyle(byId.get(f.properties.iso3)),onEachFeature:(feature,layer)=>{
         const r=byId.get(feature.properties.iso3);if(!r)return;
-        state.polygons.set(r.iso3,layer);layer.bindTooltip(`${escape(r.pais)} · ${format(r.indice_democracia)}`,{sticky:true,className:'country-name'});
-        layer.on({mouseover:()=>{layer.setStyle({weight:3,color:'#68a9ee',fillOpacity:.95});layer.bringToFront();},mouseout:()=>layer.setStyle(polygonStyle(r)),click:()=>selectCountry(r,false,false)});
+        state.polygons.set(r.iso3,layer);layer.bindTooltip(`${escape(r.pais)} · ${format(r.indice_democracia)}`,{sticky:true});
+        layer.on({mouseover:()=>{layer.setStyle({weight:3,color:'#70a7e4',fillOpacity:.95});layer.bringToFront();},mouseout:()=>layer.setStyle(polygonStyle(r)),click:event=>{selectCountry(r,false,false);openCountryPopup(r,event.latlng);}});
       }}).addTo(map);
       state.records.forEach(r=>{
-        const marker=L.circleMarker([r.latitude,r.longitude],{radius:5,color:'#fff',weight:1.5,fillColor:'#102f59',fillOpacity:1}).addTo(map);
+        const marker=L.circleMarker([r.latitude,r.longitude],{radius:5,color:'#fff',weight:1.5,fillColor:'#102d54',fillOpacity:1}).addTo(map);
         marker.bindTooltip(escape(r.pais),{permanent:map.getZoom()>=4,direction:'top',className:'country-name'});
-        marker.on({click:()=>selectCountry(r,false),mouseover:()=>state.polygons.get(r.iso3)?.setStyle({weight:3,color:'#68a9ee',fillOpacity:.95}),mouseout:()=>state.polygons.get(r.iso3)?.setStyle(polygonStyle(r))});state.markers.set(r.iso3,marker);
+        marker.on('click',()=>{selectCountry(r,false,false);openCountryPopup(r,marker.getLatLng());});state.markers.set(r.iso3,marker);
       });
       map.on('zoomend',()=>state.records.forEach(r=>{const m=state.markers.get(r.iso3);m.unbindTooltip().bindTooltip(escape(r.pais),{permanent:map.getZoom()>=4,direction:'top',className:'country-name'});}));
     }
     // ## 8. Seleção, busca e navegação por teclado
-    function selectCountry(record,move=true){
+    function selectCountry(record,move=true,open=true){
       const previous=state.selected;state.selected=record.iso3;
       if(previous)state.polygons.get(previous)?.setStyle(polygonStyle(state.records.find(r=>r.iso3===previous)));
-      state.polygons.get(record.iso3)?.setStyle(polygonStyle(record));state.markers.forEach((marker,id)=>marker.setStyle({radius:id===record.iso3?8:5,fillColor:id===record.iso3?'#68a9ee':'#102f59'}));showDetails(record);ui.countries.value=record.iso3;
-      if(move)map.setView([record.latitude,record.longitude],5);
+      state.polygons.get(record.iso3)?.setStyle(polygonStyle(record));showDetails(record);ui.countries.value=record.iso3;
+      if(move)map.setView([record.latitude,record.longitude],5);if(open)openCountryPopup(record,[record.latitude,record.longitude]);
     }
     function options(){const query=normalize(ui.search.value);const records=state.records.filter(r=>normalize(r.pais).includes(query));ui.countries.replaceChildren(new Option(`${records.length} país(es) — selecione…`,''),...records.map(r=>new Option(r.pais,r.iso3)));return records;}
     // ## 9. Inicialização e erros visíveis
@@ -120,14 +132,14 @@
       try{
         if(!window.L||!window.Papa)throw new Error('As dependências do mapa não carregaram. Verifique sua conexão e recarregue.');
         map=L.map('map',{minZoom:2,maxZoom:10,maxBounds:[[-85,-180],[85,180]],maxBoundsViscosity:1}).setView(CONFIG.center,CONFIG.zoom);
-        // Base vetorial local: sem provedor de tiles, sem chave de API.
+        // Base cartográfica local, sem serviço de tiles ou chave de API.
         map.attributionControl.addAttribution('Limites: <a href="https://www.naturalearthdata.com/">Natural Earth</a>');
         const [csv,world]=await Promise.all([load(CONFIG.data,'text'),load(CONFIG.boundaries)]);state.records=parseData(csv);
         const ids=new Set(world.features.map(f=>f.properties.iso3));const missing=state.records.filter(r=>!ids.has(r.iso3));if(missing.length)throw new Error(`Países sem polígono: ${missing.map(r=>r.pais).join(', ')}.`);
-        draw(world);options();ui.count.textContent=`${state.records.length} países na amostra`;ui.status.textContent='Base carregada. Pontos posicionados nas capitais.';
+        draw(world);options();ui.count.textContent=`${state.records.length} países na amostra`;ui.status.textContent='V4 • Base vetorial local carregada. Pontos nas capitais.';
         ui.search.addEventListener('input',options);ui.search.addEventListener('keydown',e=>{if(e.key==='Enter'){const found=options();if(found.length===1)selectCountry(found[0]);}});
         ui.countries.addEventListener('change',()=>{const r=state.records.find(r=>r.iso3===ui.countries.value);if(r)selectCountry(r);});
-        ui.reset.addEventListener('click',()=>{const previous=state.selected;state.selected=null;if(previous)state.polygons.get(previous)?.setStyle(polygonStyle(state.records.find(r=>r.iso3===previous)));state.markers.forEach(m=>m.setStyle({radius:5,fillColor:'#102f59'}));map.setView(CONFIG.center,CONFIG.zoom);ui.search.value='';options();});
+        ui.reset.addEventListener('click',()=>{map.closePopup();map.setView(CONFIG.center,CONFIG.zoom);ui.search.value='';options();});
       }catch(error){console.error(error);ui.status.textContent=`Erro: ${error.message} Abra o projeto por um servidor HTTP ou GitHub Pages.`;ui.count.textContent='Falha no carregamento';}
     }
     init();
